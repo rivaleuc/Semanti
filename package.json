@@ -1,0 +1,9 @@
+{
+  "name": "semanti",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm -r build",
+    "test:contracts": "cd contracts && forge test -vv"
+  }
+}

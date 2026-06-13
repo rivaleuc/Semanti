@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-canvas: #f0f5fb;
+  --color-canvas-dark: #181c20;
+  --color-surface: #ffffff;
+  --color-surface-dark: #1f242a;
+  --color-ink: #16202b;
+  --color-ink-dark: #e8edf2;
+  --color-muted: #5a6b7d;
+  --color-muted-dark: #97a4b1;
+  --color-line: #d7e1ec;
+  --color-line-dark: #2c333b;
+  --color-accent: oklch(0.62 0.14 240);
+  --color-accent-strong: oklch(0.54 0.15 240);
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+}
+
+body {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+.dark body {
+  background: var(--color-canvas-dark);
+  color: var(--color-ink-dark);
+}
+
+.btn-anim {
+  transition: transform 80ms ease, opacity 80ms ease;
+}
+.btn-anim:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
