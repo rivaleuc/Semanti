@@ -35,15 +35,45 @@ Two properties matter:
   evidence can reopen a finalized node under a fresh settlement nonce that
   the vault will only honor once.
 
+## Why GenLayer
+
+A promise like "production-ready by Q3" cannot be settled by a deterministic
+VM, and not because of gas. The judgment itself is the problem.
+
+- **Meaning is not a pure function of explicit inputs.** Solidity state
+  transitions must be deterministic: same inputs, same output, verifiable by
+  every node. Deciding whether a vague promise was kept is interpretation, not
+  computation. The only way to put it on a deterministic chain is to hardcode
+  a checklist at signing time or trust an oracle, and both throw away the
+  thing that made the promise worth bonding.
+- **GenLayer reaches consensus on meaning, not bytes.** Validators run diverse
+  LLMs and agree through an equivalence predicate, not byte-identical output.
+  Two models can phrase a verdict differently and still be counted as the same
+  judgment. That is exactly the consensus shape a semantic verdict needs.
+- **Re-evaluation is legitimate here.** A deterministic function must return
+  the same answer for the same input forever, so "judge this again later" is
+  meaningless. On GenLayer a new validator set and fresh evidence can produce a
+  different, better-grounded belief. Semanti leans on this directly: belief
+  hardens over consecutive rounds, and new evidence can reopen a finalized
+  commitment.
+- **Native web access, no oracle.** The leader fetches evidence (status pages,
+  logs) inside the non-deterministic block with `gl.nondet.web`, treated as
+  untrusted data, so there is no separate oracle to trust or bribe.
+
+The deterministic part still belongs on the EVM. Money, bonds, replay
+protection, and the challenge window live in the Base vault, which never
+interprets anything. GenLayer decides what happened; Base enforces what that
+means for the stakes. Each chain does only what it is good at.
+
 ## Architecture
 
 - `contracts/` holds the EVM side: `SMTToken` and `SemantiVault` (Foundry,
   Solidity 0.8.30). The vault never interprets anything. It locks bonds,
   accepts counter-stakes, and executes proportional settlement when the
   resolver delivers a finalized belief with an unused nonce.
-- `genlayer/semanti.py` is the intelligent contract: the commitment graph,
-  the epoch evaluation loop, precedent retrieval and diffusion, and the
-  ghost-contract call into the vault.
+- `genlayer/semanti.py` is the intelligent contract: the commitment store, the
+  consensus-gated LLM re-evaluation, the precedent log fed back into prompts,
+  and the `read_settlement` view the vault's resolver reads.
 - `packages/sdk/` is a small TypeScript package (commitment id derivation,
   settlement math, ABIs). Install it from the repo, not a registry.
 - `web/` is the Next.js interface for posting and tracking commitments.
