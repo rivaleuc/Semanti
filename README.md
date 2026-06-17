@@ -74,9 +74,36 @@ means for the stakes. Each chain does only what it is good at.
 - `genlayer/semanti.py` is the intelligent contract: the commitment store, the
   consensus-gated LLM re-evaluation, the precedent log fed back into prompts,
   and the `read_settlement` view the vault's resolver reads.
-- `packages/sdk/` is a small TypeScript package (commitment id derivation,
-  settlement math, ABIs). Install it from the repo, not a registry.
-- `web/` is the Next.js interface for posting and tracking commitments.
+- `packages/sdk/` is a small TypeScript package. `index.ts` has the EVM side
+  (commitment id derivation, settlement math, ABIs); `genlayer.ts` wraps the
+  GenLayer contract (post, re-evaluate, read belief and settlement via
+  `genlayer-js`) and maps a finalized GenLayer settlement onto the vault's
+  `settle` arguments. Install it from the repo, not a registry.
+- `web/` is the Next.js interface. It posts the bond on the Base vault and,
+  in the same view, creates and re-evaluates the commitment on the GenLayer
+  contract, reads the live belief distribution, and maps the finalized
+  settlement back into the vault `settle` call.
+
+## Frontend and SDK path to GenLayer
+
+The interface talks to both chains. The EVM panel locks the bond on the Base
+vault. The GenLayer panel (`web/app/app/genlayer-panel.tsx`) calls the live
+intelligent contract through the SDK:
+
+- `postCommitment` / `reevaluate` / `submitEvidence` are GenLayer writes
+  (signed by the GenLayer Snap in the browser, or a private key in a keeper).
+- `getBelief` / `readSettlement` / `readStats` are GenLayer reads and need no
+  account; the panel polls them to show the live belief distribution and the
+  convergence streak.
+- `settlementToVaultArgs(key, settlement)` maps a finalized GenLayer verdict
+  onto `SemantiVault.settle(keccak256(key), keptBps, breachBps, nonce)`, the
+  exact resolver-gated call that moves money on Base. The EVM commitment id is
+  `keccak256(key)`, the same id used when the bond was posted, so settlement
+  lands on the right escrow.
+
+The settlement direction is GenLayer to Base: belief converges on GenLayer,
+the resolver reads `read_settlement`, and only then is `settle` callable on
+the vault.
 
 ## Status
 

@@ -3,6 +3,7 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { commitmentId, vaultAbi, erc20Abi } from "@semanti/sdk";
 import Link from "next/link";
+import { GenLayerPanel } from "./genlayer-panel";
 import { useState } from "react";
 import { parseUnits, type Address, isAddress, maxUint256 } from "viem";
 import {
@@ -182,6 +183,8 @@ export default function AppPage() {
           )}
         </div>
       </section>
+
+      <GenLayerPanel />
     </main>
   );
 }

@@ -1,5 +1,7 @@
 import { keccak256, toHex, type Address } from "viem";
 
+export * from "./genlayer.js";
+
 export const BPS = 10_000n;
 
 /** Belief distribution of a commitment, in basis points (sums to 10000). */
